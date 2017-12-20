@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+var path = require('path');
 var fis = module.exports = require('fis3');
 //先把rake加到插件查找中
 fis.require.prefixes.unshift('rake');
@@ -9,8 +10,10 @@ fis.cli.info = require('./package.json');
 
 //文件过滤设置
 fis.set('project.ignore', ['node_modules/!**', 'output/!**', 'fis-conf.js']);
+
+var projectName = fis.get('appName');
 //默认设置
-fis.set('statics', './node_modules/.webroot/static');
+fis.set('statics', '/.static');
 fis.set('namespace', '');
 fis.set('domain', '');
 
@@ -27,11 +30,11 @@ fis.match('**', {
 })
     .match('/static/(**)', {
         isMod: true,
-        release: '${statics}/${namespace}/$1',
-        url : "/static/$1"
+        release: '${statics}/${namespace}/static/' + '' + '/$1',
+        url: "/static/$1"
     })
     .match('(**).tmpl', {
-        release: '${statics}/${namespace}/$1',
+        release: '${statics}/${namespace}/static/' + '' + '/$1',
         rExt: '.js',
         isMod: true,
         parser: [fis.plugin('bdtmpl', {
@@ -54,16 +57,16 @@ fis.match('**', {
         usePostprocessor: false,
         isMod: false,
         parser: false,
-        release: "${statics}/${namespace}/lib/$1",
+        release: "${statics}/${namespace}/static/lib/$1",
     })
     //产出到views 供模板使用
     .match('/(manifest.json)', {
         useHash: false,
-        release: 'app/webroot/views/$1'
+        release: 'views/$1'
     })
     .match('/(map.json)', {
         useHash: false,
-        release: '${statics}/${namespace}/$1'
+        release: '${statics}/${namespace}/static/$1'
     })
     .match('::image', {
         useMap: true
@@ -83,15 +86,25 @@ fis.match('**', {
     })
     //widget处理
     .match('/(widget/**)', {
-        release: '${statics}/${namespace}/$1',
+        release: '${statics}/${namespace}/static/$1',
         isMod: true,
-        url : "/static/$1"
+        url: "/static/$1"
     })
     .match('/(widget/ui/(components/**))', {
         id: '$2',
-        release: '${statics}/${namespace}/$1',
+        release: '${statics}/${namespace}/static/$1',
         isMod: true,
-        url : "/static/$1"
+        url: "/static/$1"
+    })
+    .match('/(widget/**.html)', {
+        useHash: false,
+        useMap: false,
+        release: 'views/$1'
+    })
+    .match('/(views/(**.html))', {
+        useHash: false,
+        useMap: false,
+        release: 'views/$2'
     })
 ;
 
@@ -135,9 +148,7 @@ fis.media('debug').match('/**', {
     useSprite: false,
     optimizer: null,
     domain: '${domain}',
-    deploy: fis.plugin('local-deliver', {
-        to: './'
-    })
+    deploy: [deploy]
 });
 
 //dev环境 不压缩
@@ -145,16 +156,36 @@ fis.media('dev')
     .match('/**', {
         optimizer: null,
         domain: '${domain}',
-        deploy: fis.plugin('local-deliver', {
-            to: './'
-        })
+        deploy: [deploy]
     });
 
 //prod环境 开启压缩
 fis.media('prod')
     .match('/**', {
         domain: '${domain}',
-        deploy: fis.plugin('local-deliver', {
-            to: './'
-        })
+        deploy: [deploy]
     });
+
+/**
+ * 静态资源产出
+ * @param options
+ * @param modified
+ * @param total
+ * @param next
+ */
+function deploy(options, modified, total, next) {
+    /*
+     fis.plugin('local-deliver', {
+     to: '../'
+     })
+     */
+    var plugin = fis.require('deploy-local-deliver');
+    //var releasePath = path.join(fis.get('utopiaAppDir'), 'app/public/.static/');
+    var releasePath = getReleasePath();
+    options.to = releasePath;
+    plugin.apply(null, arguments);
+}
+
+function getReleasePath() {
+    return path.join(fis.get('appDir'), 'node_modules/.webroot/');
+}

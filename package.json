@@ -72,6 +72,7 @@
     "fis3-packager-map": "^1.1.3",
     "liftoff": "^2.2.4",
     "minimist": "^1.2.0",
+    "path": "^0.12.7",
     "rake-parser-bdtmpl": "^1.1.0",
     "rake-parser-less-common": "^1.1.4",
     "rake-postpackager-seajs": "^1.1.2",
@@ -97,7 +98,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "version": "1.0.12",
+  "version": "1.0.19",
   "description": "build framework",
   "repository": {
     "type": "git",
