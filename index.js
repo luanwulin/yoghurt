@@ -21,20 +21,19 @@ fis.hook('relative');
 
 fis.hook('cmd');
 
-fis.match('**', {
-
-    useMap: true,
-    useHash: true,
-    relative: true,
-    release: false
-})
+fis
+    .match('**', {
+        useMap: true,
+        useHash: true,
+        relative: true,
+        release: false
+    })
     .match('/static/(**)', {
         isMod: true,
-        release: '${statics}/${namespace}/static/' + '' + '/$1',
-        url: "/static/$1"
+        release: '${statics}/${namespace}/$1',
     })
     .match('(**).tmpl', {
-        release: '${statics}/${namespace}/static/' + '' + '/$1',
+        release: '${statics}/${namespace}/$1',
         rExt: '.js',
         isMod: true,
         parser: [fis.plugin('bdtmpl', {
@@ -57,7 +56,7 @@ fis.match('**', {
         usePostprocessor: false,
         isMod: false,
         parser: false,
-        release: "${statics}/${namespace}/static/lib/$1",
+        release: "${statics}/${namespace}/lib/$1",
     })
     //产出到views 供模板使用
     .match('/(manifest.json)', {
@@ -66,7 +65,7 @@ fis.match('**', {
     })
     .match('/(map.json)', {
         useHash: false,
-        release: '${statics}/${namespace}/static/$1'
+        release: '${statics}/${namespace}/$1'
     })
     .match('::image', {
         useMap: true
@@ -86,15 +85,13 @@ fis.match('**', {
     })
     //widget处理
     .match('/(widget/**)', {
-        release: '${statics}/${namespace}/static/$1',
-        isMod: true,
-        url: "/static/$1"
+        release: '${statics}/${namespace}/$1',
+        isMod: true
     })
     .match('/(widget/ui/(components/**))', {
         id: '$2',
-        release: '${statics}/${namespace}/static/$1',
-        isMod: true,
-        url: "/static/$1"
+        release: '${statics}/${namespace}/$1',
+        isMod: true
     })
     .match('/(widget/**.html)', {
         useHash: false,
